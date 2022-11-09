@@ -1,11 +1,19 @@
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
 library(readr)
 library(ggplot2)
 library(dplyr)
+library(shiny)
 library(lubridate)
 library(treemapify)
+library(shinyWidgets)
 
-
-# data source: https://data.cityofchicago.org/Public-Safety/Crimes-2022/9hwr-2zxp
 
 data <- read_csv("CrimesChicago_2022.csv")
 data$Date <- parse_date_time(data$Date, "%m/%d/%y %I:%M:%S %p")
@@ -46,19 +54,99 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
 data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 
 # Graph 1
-ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
-  geom_bar()
+#ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
+#  geom_bar()
 
 # a esta grafica le debemos poder apicar un filtro en data para ver solamente cierto tipo de crimenes
 # Graph 2
-data$month
+#data$month
 
-count_type <- count(data, `Primary Type`)
+#count_type <- count(data, `Primary Type`)
 
-ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
-  geom_treemap() +
-  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
-                    reflow = TRUE, min.size = 3)
+#ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
+#  geom_treemap() +
+#  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
+#                    reflow = TRUE, min.size = 3)
 
 
-table(data$`Location Description`)
+
+
+# Define UI for application that plots features of movies -----------
+ui <- fluidPage(
+  
+  # Application title -----------------------------------------------
+  titlePanel("Crimes in Chicago, 2022"),
+  
+  # Sidebar layout with a input and output definitions --------------
+  sidebarLayout(
+    
+    # Inputs: Select variables to plot ------------------------------
+    sidebarPanel(
+      
+      # Show data table ---------------------------------------------
+      checkboxGroupInput(inputId = "domestic_check",
+                    label = "Include Domestic Violence Crimes",
+                    choices = c("Domestic", "Non-domestic"),
+                    selected = "Domestic"),
+      
+      pickerInput(inputId = "location_picker",
+                  label = "Location", 
+                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE"), 
+                  options = list(`actions-box` = TRUE), 
+                  multiple = T, 
+                  selected = "BANK")
+    ),
+    
+    # Output --------------------------------------------------------
+    mainPanel(
+      
+      # Show bar chart --------------------------------------------
+      plotOutput(outputId = "bar_chart"),
+      
+      # Show treemap
+      plotOutput(outputId = "tree_map")
+    )
+  )
+)
+
+# Define server function required to create the bar chart ---------
+server <- function(input, output, session) {
+  
+  observe({
+    print(input$location_picker)
+  })
+  
+  # Create subset of the data --
+  data_subset_domestic <- reactive({
+    req(input$domestic_check, input$location_picker)
+    filter(data, IsDomestic %in% input$domestic_check & `Location Description` %in% input$location_picker)
+  })
+  
+  # Create graph
+  output$bar_chart <- renderPlot({
+    ggplot(data = data_subset_domestic(), aes(x = reorder(Month, as.integer(month)))) +
+      geom_bar()
+    
+  })
+  
+  # Create a second graph
+  #count_type <- count(data_subset_domestic(), `Primary Type`)
+  output$tree_map <- renderPlot({
+    ggplot(count(data_subset_domestic(), `Primary Type`), aes(area = n, label = `Primary Type` , fill = n)) +
+      geom_treemap() +
+      geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
+                        reflow = TRUE, min.size = 3)
+  })
+  
+  # Print data table if checked -------------------------------------
+  #output$moviestable <- DT::renderDataTable(
+  #  if(input$show_data){
+  #    DT::datatable(data = movies[, 1:7], 
+  #                  options = list(pageLength = 10), 
+  #                  rownames = FALSE)
+  #  }
+  #)
+}
+
+# Run the application -----------------------------------------------
+shinyApp(ui = ui, server = server)

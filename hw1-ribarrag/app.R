@@ -12,6 +12,7 @@ library(dplyr)
 library(shiny)
 library(lubridate)
 library(treemapify)
+library(shinyWidgets)
 
 
 data <- read_csv("CrimesChicago_2022.csv")
@@ -84,9 +85,16 @@ ui <- fluidPage(
       
       # Show data table ---------------------------------------------
       checkboxGroupInput(inputId = "domestic_check",
-                    label = "Include Domestic Violence Crimes",
-                    choices = c("Domestic", "Non-domestic"),
-                    selected = "Domestic"),
+                         label = "Include Domestic Violence Crimes",
+                         choices = c("Domestic", "Non-domestic"),
+                         selected = "Domestic"),
+      
+      pickerInput(inputId = "location_picker",
+                  label = "Location", 
+                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE"), 
+                  options = list(`actions-box` = TRUE), 
+                  multiple = T, 
+                  selected = "BANK")
     ),
     
     # Output --------------------------------------------------------
@@ -104,10 +112,14 @@ ui <- fluidPage(
 # Define server function required to create the bar chart ---------
 server <- function(input, output, session) {
   
+  observe({
+    print(input$location_picker)
+  })
+  
   # Create subset of the data --
   data_subset_domestic <- reactive({
-    req(input$domestic_check)
-    filter(data, IsDomestic %in% input$domestic_check)
+    req(input$domestic_check, input$location_picker)
+    filter(data, IsDomestic %in% input$domestic_check & `Location Description` %in% input$location_picker)
   })
   
   # Create graph
