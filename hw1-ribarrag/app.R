@@ -93,7 +93,10 @@ ui <- fluidPage(
     mainPanel(
       
       # Show bar chart --------------------------------------------
-      plotOutput(outputId = "bar_chart")
+      plotOutput(outputId = "bar_chart"),
+      
+      # Show treemap
+      plotOutput(outputId = "tree_map")
     )
   )
 )
@@ -112,6 +115,15 @@ server <- function(input, output, session) {
     ggplot(data = data_subset_domestic(), aes(x = reorder(Month, as.integer(month)))) +
       geom_bar()
     
+  })
+  
+  # Create a second graph
+  #count_type <- count(data_subset_domestic(), `Primary Type`)
+  output$tree_map <- renderPlot({
+    ggplot(count(data_subset_domestic(), `Primary Type`), aes(area = n, label = `Primary Type` , fill = n)) +
+      geom_treemap() +
+      geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
+                        reflow = TRUE, min.size = 3)
   })
   
   # Print data table if checked -------------------------------------
