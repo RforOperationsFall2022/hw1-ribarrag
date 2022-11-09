@@ -23,7 +23,6 @@ data$Month <- month.abb[as.integer(data$month)]
 data$Hour <- hour(data$Date)
 data$Wday <- wday(data$Date, label = TRUE)
 
-
 data$`Location Description` <- dplyr::case_when(data$`Location Description` %in% c("AIRCRAFT", "BOAT / WATERCRAFT", "COIN OPERATED MACHINE", "OTHER (SPECIFY)", "VESTIBULE", "FARM") ~ "OTHER",
                                                 data$`Location Description` %in% c("AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA", "AIRPORT BUILDING NON-TERMINAL - SECURE AREA", "AIRPORT EXTERIOR - NON-SECURE AREA", 
                                                                                    "AIRPORT EXTERIOR - SECURE AREA", "AIRPORT PARKING LOT", "AIRPORT TERMINAL LOWER LEVEL - NON-SECURE AREA", 
@@ -109,6 +108,10 @@ ui <- fluidPage(
                     label = "Show data table",
                     value = TRUE),
       
+      # download button
+      downloadLink("downloadData",
+                   "Download")
+      
     ),
     
     # Output --------------------------------------------------------
@@ -170,8 +173,15 @@ server <- function(input, output, session) {
       DT::datatable(data = data_subset_domestic()[, 1:7], 
                     options = list(pageLength = 10), 
                     rownames = FALSE)
-    }
-  )
+    })
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("data_subset_domestic", Sys.Date(), ".csv", sep="")
+    },
+    content = function(con) {
+      write.csv(data, con)
+    })
 }
 
 # Run the application -----------------------------------------------
