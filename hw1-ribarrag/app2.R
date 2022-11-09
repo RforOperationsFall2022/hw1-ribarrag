@@ -57,24 +57,6 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
 data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 
 
-# Graph 1
-#ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
-#  geom_bar()
-
-# a esta grafica le debemos poder apicar un filtro en data para ver solamente cierto tipo de crimenes
-# Graph 2
-#data$month
-
-#count_type <- count(data, `Primary Type`)
-
-#ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
-#  geom_treemap() +
-#  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
-#                    reflow = TRUE, min.size = 3)
-
-
-
-
 # Define UI for application that plots features of movies -----------
 ui <- fluidPage(
   
@@ -101,7 +83,7 @@ ui <- fluidPage(
                              "VACANT LOT/SPACE", "CHURCH", "VENUE", "INDUSTRIAL SPACE" , "OTHER"), 
                   options = list(`actions-box` = TRUE), 
                   multiple = T, 
-                  selected = "COMMERCIAL PROPERTY"),
+                  selected = "BANK"),
       
       # Show data table
       checkboxInput(inputId = "show_table",
@@ -116,17 +98,14 @@ ui <- fluidPage(
     
     # Output --------------------------------------------------------
     mainPanel(
+      # Create tabs to display the three graphs, one per tab
+      tabsetPanel(
+        tabPanel(title = "Bar Chart", plotOutput(outputId = "bar_chart")),
+        tabPanel(title = "Tree Map", plotOutput(outputId = "tree_map")),
+        tabPanel(title = "Heat Map", plotOutput(outputId = "heat_map"))
+        ),
       
-      # Show bar chart --------------------------------------------
-      plotOutput(outputId = "bar_chart"),
-      
-      # Show treemap
-      plotOutput(outputId = "tree_map"),
-      
-      # Show heatmap
-      plotOutput(outputId = "heat_map"),
-      
-      #Show table
+      #Show tableat bottom of the tabsPanel
       DT::dataTableOutput(outputId = "crimes_table")
     )
   )
