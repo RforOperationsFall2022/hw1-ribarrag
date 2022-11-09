@@ -19,6 +19,8 @@ data <- read_csv("CrimesChicago_2022.csv")
 data$Date <- parse_date_time(data$Date, "%m/%d/%y %I:%M:%S %p")
 data$month <- format(as.Date(data$Date), "%m")
 data$Month <- month.abb[as.integer(data$month)]
+data$Hour <- hour(data$Date)
+data$Wday <- wday(data$Date, label = TRUE)
 
 data$`Location Description` <- dplyr::case_when(data$`Location Description` %in% c("AIRCRAFT", "BOAT / WATERCRAFT", "COIN OPERATED MACHINE", "OTHER (SPECIFY)", "VESTIBULE", "FARM") ~ "OTHER",
                                                 data$`Location Description` %in% c("AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA", "AIRPORT BUILDING NON-TERMINAL - SECURE AREA", "AIRPORT EXTERIOR - NON-SECURE AREA", 
@@ -52,6 +54,7 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
                                                                                    "HOTEL / MOTEL", "RESTAURANT", "RETAIL STORE", "TAVERN", "TAVERN / LIQUOR STORE", "SMALL RETAIL STORE") ~ "COMMERCIAL PROPERTY")
 
 data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
+
 
 # Graph 1
 #ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
@@ -91,7 +94,9 @@ ui <- fluidPage(
       
       pickerInput(inputId = "location_picker",
                   label = "Location", 
-                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE"), 
+                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE", "MEDICAL FACILITY", 
+                            "OPEN PRIVATE SPACE", "OPEN PUBLIC SPACE", "PUBLIC TRANSIT", 'RESIDENCE', "SCHOOL", "VACANT LOT/SPACE", 
+                            "VEHICLE", "VENUE", "OTHER"), 
                   options = list(`actions-box` = TRUE), 
                   multiple = T, 
                   selected = "BANK")
@@ -104,7 +109,10 @@ ui <- fluidPage(
       plotOutput(outputId = "bar_chart"),
       
       # Show treemap
-      plotOutput(outputId = "tree_map")
+      plotOutput(outputId = "tree_map"),
+      
+      # Show heatmap
+      plotOutput((outputId = "heat_map"))
     )
   )
 )
@@ -136,6 +144,12 @@ server <- function(input, output, session) {
       geom_treemap() +
       geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
                         reflow = TRUE, min.size = 3)
+  })
+  
+  # Create third graph: heatmap
+  output$heat_map <- renderPlot({
+    ggplot(count(data_subset_domestic(), Hour, Wday), aes(Hour, Wday)) +
+      geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal()
   })
   
   # Print data table if checked -------------------------------------

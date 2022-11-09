@@ -62,3 +62,14 @@ ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
 
 
 table(data$`Location Description`)
+
+data$Hour <- hour(data$Date)
+data$Wday <- wday(data$Date, label = TRUE)
+
+
+
+count_date <- count(data, Hour, Wday)
+
+
+ggplot(count_date, aes(Hour, Wday)) +
+  geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal()
