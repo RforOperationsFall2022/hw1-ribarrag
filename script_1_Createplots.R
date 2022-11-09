@@ -11,8 +11,6 @@ data <- read_csv("CrimesChicago_2022.csv")
 data$Date <- parse_date_time(data$Date, "%m/%d/%y %I:%M:%S %p")
 data$month <- format(as.Date(data$Date), "%m")
 data$Month <- month.abb[as.integer(data$month)]
-colnames(data)
-table(data$`Location Description`)
 
 data$`Location Description` <- dplyr::case_when(data$`Location Description` %in% c("AIRCRAFT", "BOAT / WATERCRAFT", "COIN OPERATED MACHINE", "OTHER (SPECIFY)", "VESTIBULE", "FARM") ~ "OTHER",
                                                 data$`Location Description` %in% c("AIRPORT BUILDING NON-TERMINAL - NON-SECURE AREA", "AIRPORT BUILDING NON-TERMINAL - SECURE AREA", "AIRPORT EXTERIOR - NON-SECURE AREA", 
@@ -45,22 +43,7 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
                                                                                    "DEPARTMENT STORE", "DRUG STORE", "GAS STATION", "GROCERY FOOD STORE", "PAWN SHOP", "POOL ROOM", "LIQUOR STORE", "HOTEL", 
                                                                                    "HOTEL / MOTEL", "RESTAURANT", "RETAIL STORE", "TAVERN", "TAVERN / LIQUOR STORE", "SMALL RETAIL STORE") ~ "COMMERCIAL PROPERTY")
 
-table(data$`Location Description`)
-
-
-data_state = data %>% group_by(State, Segment)  %>%
-  summarise(total_sales = sum(Sales),
-            total_profits = sum(Profit),
-            avg_discount = mean(Discount),
-            .groups = 'drop')
-
-nrow(data_state)
-
-hist(x, breaks = bins, col = 'darkgray', border = 'white',
-     xlab = 'Waiting time to next eruption (in mins)',
-     main = 'Histogram of waiting times')
-
-colnames(data)
+data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 
 # Graph 1
 ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
@@ -79,11 +62,3 @@ ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
 
 
 
-
-library(shiny)
-profit <- data$Profit
-bins <- seq(min(profit), max(profit), length.out = input$bins + 1)
-
-hist(data_state$total_sales)
-
-?strptime()
