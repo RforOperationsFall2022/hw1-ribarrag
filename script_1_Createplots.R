@@ -61,15 +61,23 @@ ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
                     reflow = TRUE, min.size = 3)
 
 
+
+# third graph: heatmap
 table(data$`Location Description`)
 
 data$Hour <- hour(data$Date)
 data$Wday <- wday(data$Date, label = TRUE)
 
-
+table(data$`Location Description`)[order(table(data$`Location Description`))]
 
 count_date <- count(data, Hour, Wday)
+table(data$Hour)
 
 
 ggplot(count_date, aes(Hour, Wday)) +
   geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal()
+
+
+# fourth graph: another heatmap
+(table(data$`Primary Type`))
+

@@ -90,16 +90,16 @@ ui <- fluidPage(
       checkboxGroupInput(inputId = "domestic_check",
                          label = "Include Domestic Violence Crimes",
                          choices = c("Domestic", "Non-domestic"),
-                         selected = "Domestic"),
+                         selected = "Non-domestic"),
       
       pickerInput(inputId = "location_picker",
                   label = "Location", 
-                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE", "MEDICAL FACILITY", 
-                            "OPEN PRIVATE SPACE", "OPEN PUBLIC SPACE", "PUBLIC TRANSIT", 'RESIDENCE', "SCHOOL", "VACANT LOT/SPACE", 
-                            "VEHICLE", "VENUE", "OTHER"), 
+                  choices=c("COMMERCIAL PROPERTY", "OPEN PUBLIC SPACE", "RESIDENCE", "OPEN PRIVATE SPACE", "SCHOOL",
+                            "PUBLIC TRANSIT", "VEHICLE", "MEDICAL FACILITY","GOVERNMENT FACILITY", "BANK",
+                            "VACANT LOT/SPACE", "CHURCH", "VENUE", "INDUSTRIAL SPACE" , "OTHER"), 
                   options = list(`actions-box` = TRUE), 
                   multiple = T, 
-                  selected = "BANK")
+                  selected = "COMMERCIAL PROPERTY")
     ),
     
     # Output --------------------------------------------------------

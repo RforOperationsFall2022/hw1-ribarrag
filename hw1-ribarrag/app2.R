@@ -13,6 +13,7 @@ library(shiny)
 library(lubridate)
 library(treemapify)
 library(shinyWidgets)
+library(DT)
 
 
 data <- read_csv("CrimesChicago_2022.csv")
@@ -86,20 +87,27 @@ ui <- fluidPage(
     # Inputs: Select variables to plot ------------------------------
     sidebarPanel(
       
-      # Show data table ---------------------------------------------
+      # Select domestic / non domestic crime
       checkboxGroupInput(inputId = "domestic_check",
                     label = "Include Domestic Violence Crimes",
                     choices = c("Domestic", "Non-domestic"),
-                    selected = "Domestic"),
+                    selected = "Non-domestic"),
       
+      # Pick crime location
       pickerInput(inputId = "location_picker",
                   label = "Location", 
-                  choices=c("BANK", "CHURCH", "COMMERCIAL PROPERTY", "GOVERNMENT FACILITY", "INDUSTRIAL SPACE", "MEDICAL FACILITY", 
-                            "OPEN PRIVATE SPACE", "OPEN PUBLIC SPACE", "PUBLIC TRANSIT", 'RESIDENCE', "SCHOOL", "VACANT LOT/SPACE", 
-                            "VEHICLE", "VENUE", "OTHER"), 
+                  choices=c("COMMERCIAL PROPERTY", "OPEN PUBLIC SPACE", "RESIDENCE", "OPEN PRIVATE SPACE", "SCHOOL",
+                            "PUBLIC TRANSIT", "VEHICLE", "MEDICAL FACILITY","GOVERNMENT FACILITY", "BANK",
+                             "VACANT LOT/SPACE", "CHURCH", "VENUE", "INDUSTRIAL SPACE" , "OTHER"), 
                   options = list(`actions-box` = TRUE), 
                   multiple = T, 
-                  selected = "BANK")
+                  selected = "COMMERCIAL PROPERTY"),
+      
+      # Show data table
+      checkboxInput(inputId = "show_table",
+                    label = "Show data table",
+                    value = TRUE),
+      
     ),
     
     # Output --------------------------------------------------------
@@ -112,7 +120,10 @@ ui <- fluidPage(
       plotOutput(outputId = "tree_map"),
       
       # Show heatmap
-      plotOutput((outputId = "heat_map"))
+      plotOutput(outputId = "heat_map"),
+      
+      #Show table
+      DT::dataTableOutput(outputId = "crimes_table")
     )
   )
 )
@@ -120,9 +131,9 @@ ui <- fluidPage(
 # Define server function required to create the bar chart ---------
 server <- function(input, output, session) {
   
-  observe({
-    print(input$location_picker)
-  })
+  #observe({
+  #  print(input$location_picker)
+  #})
   
   # Create subset of the data --
   data_subset_domestic <- reactive({
@@ -153,13 +164,13 @@ server <- function(input, output, session) {
   })
   
   # Print data table if checked -------------------------------------
-  #output$moviestable <- DT::renderDataTable(
-  #  if(input$show_data){
-  #    DT::datatable(data = movies[, 1:7], 
-  #                  options = list(pageLength = 10), 
-  #                  rownames = FALSE)
-  #  }
-  #)
+  output$crimes_table <- DT::renderDataTable(
+    if(input$show_table){
+      DT::datatable(data = data_subset_domestic()[, 1:7], 
+                    options = list(pageLength = 10), 
+                    rownames = FALSE)
+    }
+  )
 }
 
 # Run the application -----------------------------------------------
