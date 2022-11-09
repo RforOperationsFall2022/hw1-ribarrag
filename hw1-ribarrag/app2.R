@@ -108,6 +108,10 @@ ui <- fluidPage(
                     label = "Show data table",
                     value = TRUE),
       
+      # download button
+      downloadLink("downloadData",
+                   "Download")
+      
     ),
     
     # Output --------------------------------------------------------
@@ -169,8 +173,15 @@ server <- function(input, output, session) {
       DT::datatable(data = data_subset_domestic()[, 1:7], 
                     options = list(pageLength = 10), 
                     rownames = FALSE)
-    }
-  )
+    })
+
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("data_subset_domestic", Sys.Date(), ".csv", sep="")
+    },
+    content = function(con) {
+      write.csv(data, con)
+    })
 }
 
 # Run the application -----------------------------------------------
