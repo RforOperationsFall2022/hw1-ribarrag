@@ -139,9 +139,8 @@ server <- function(input, output, session) {
   })
   
   # Create a second graph
-  #count_type <- count(data_subset_domestic(), `Primary Type`)
   output$tree_map <- renderPlot({
-    ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
+    ggplot(count(data_subset_domestic(), `Primary Type`), aes(area = n, label = `Primary Type` , fill = n)) +
       geom_treemap() +
       geom_treemap_text(fontface = "bold", colour = "white", place = "center", 
                         reflow = TRUE, min.size = 3) +

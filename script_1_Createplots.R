@@ -111,3 +111,6 @@ colnames(data)
 vars_show = c("ID", "Date", "Primary Type", "Location Description", "Description", "Domestic", "Arrest")
 data[, vars_show ]
 
+
+data
+
