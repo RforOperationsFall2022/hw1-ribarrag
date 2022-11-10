@@ -129,29 +129,51 @@ server <- function(input, output, session) {
   output$bar_chart <- renderPlot({
     ggplot(data = data_subset_domestic(), aes(x = reorder(Month, as.integer(month)))) +
       geom_bar(fill = "#66194d") + xlab("Month") + ylab("Count of crimes") +
+      ggtitle("CRIMES PER MONTH") +
       theme(axis.text = element_text(size = 14), 
             axis.title = element_text(size = 16, face = "bold"), 
             panel.background = element_rect(fill = "white"), 
-            axis.ticks = element_blank())
+            axis.ticks = element_blank(), 
+            plot.title = element_text(size=18, face="bold"))
     
   })
   
   # Create a second graph
   #count_type <- count(data_subset_domestic(), `Primary Type`)
   output$tree_map <- renderPlot({
-    ggplot(count(data_subset_domestic(), `Primary Type`), aes(area = n, label = `Primary Type` , fill = n)) +
+    ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
       geom_treemap() +
-      geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
+      geom_treemap_text(fontface = "bold", colour = "white", place = "center", 
                         reflow = TRUE, min.size = 3) +
-      scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
+      scale_fill_gradient(low = "#f5d6eb", high = "#66194d", name = "Crime count") + 
+      ggtitle("TYPES OF CRIMES") +
+      theme(plot.title = element_text(size=18, face="bold"), 
+            legend.key.height = unit(1.2, 'cm'), 
+            legend.key.width = unit(1.2, 'cm'), 
+            legend.title = element_text(size = 14), 
+            legend.text = element_text(size = 14))
   })
+  
   
   # Create third graph: heatmap
   output$heat_map <- renderPlot({
     ggplot(count(data_subset_domestic(), Hour, Wday), aes(Hour, Wday)) +
-      geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal() +
-      scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
+      geom_tile(aes(fill = n), colour = "white", na.rm = TRUE)  +
+      ggtitle("CRIMES BY DAY AND TIME") +
+      scale_fill_gradient(low = "#f5d6eb", high = "#66194d", name = "Crime count") + 
+      scale_x_continuous(breaks=seq(0,23,1)) +
+      theme(axis.text = element_text(size = 14), 
+            axis.text.y=element_text(margin=margin(r = -35)),
+            axis.title = element_text(size = 16, face = "bold"), 
+            panel.background = element_rect(fill = "white"), 
+            axis.ticks = element_blank(), 
+            plot.title = element_text(size=18, face="bold"), 
+            legend.key.height = unit(1.2, 'cm'), 
+            legend.key.width = unit(1.2, 'cm'), 
+            legend.title = element_text(size = 14), 
+            legend.text = element_text(size = 14))
   })
+  
   
   # Print data table if checked -------------------------------------
   output$crimes_table <- DT::renderDataTable(

@@ -48,10 +48,12 @@ data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 # Graph 1
 ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
   geom_bar(fill = "#66194d") + xlab("Month") + ylab("Count of crimes") +
+  ggtitle("NUMBER OF CRIMES BY MONTH") +
   theme(axis.text = element_text(size = 14), 
         axis.title = element_text(size = 16, face = "bold"), 
         panel.background = element_rect(fill = "white"), 
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(), 
+        plot.title = element_text(size=18, face="bold"))
 
 
 # a esta grafica le debemos poder apicar un filtro en data para ver solamente cierto tipo de crimenes
@@ -62,11 +64,17 @@ count_type <- count(data, `Primary Type`)
 
 ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
   geom_treemap() +
-  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
+  geom_treemap_text(fontface = "bold", colour = "white", place = "center", 
                     reflow = TRUE, min.size = 3) +
-  scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
+  scale_fill_gradient(low = "#f5d6eb", high = "#66194d", name = "Crime count") + 
+  ggtitle("TYPES OF CRIMES") +
+  theme(plot.title = element_text(size=18, face="bold"),
+        legend.key.height = unit(1.2, 'cm'), 
+        legend.key.width = unit(1.2, 'cm'), 
+        legend.title = element_text(size = 14), 
+        legend.text = element_text(size = 14))
 
-
+?ggtitle
 
 # third graph: heatmap
 table(data$`Location Description`)
@@ -79,11 +87,24 @@ table(data$`Location Description`)[order(table(data$`Location Description`))]
 count_date <- count(data, Hour, Wday)
 table(data$Hour)
 
-
+# Heatmap
 ggplot(count_date, aes(Hour, Wday)) +
-  geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal() +
-  scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
+  geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) +
+  ggtitle("CRIMES BY DAY AND TIME") +
+  scale_x_continuous(breaks=seq(0,23,1)) +
+  scale_fill_gradient(low = "#f5d6eb", high = "#66194d", name = "Crime count") + 
+  theme(axis.text = element_text(size = 14), 
+        axis.text.y=element_text(margin=margin(r = -35)),
+        axis.title = element_text(size = 16, face = "bold"), 
+        panel.background = element_rect(fill = "white"), 
+        axis.ticks = element_blank(), 
+        plot.title = element_text(size=18, face="bold"), 
+        legend.key.height = unit(1.2, 'cm'), 
+        legend.key.width = unit(1.2, 'cm'), 
+        legend.title = element_text(size = 14), 
+        legend.text = element_text(size = 14))
 
+?unit
 
 (table(data$`Primary Type`))
 colnames(data)
