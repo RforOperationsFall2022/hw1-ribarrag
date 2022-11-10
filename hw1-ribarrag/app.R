@@ -55,24 +55,7 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
                                                                                    "HOTEL / MOTEL", "RESTAURANT", "RETAIL STORE", "TAVERN", "TAVERN / LIQUOR STORE", "SMALL RETAIL STORE") ~ "COMMERCIAL PROPERTY")
 
 data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
-
-
-# Graph 1
-#ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
-#  geom_bar()
-
-# a esta grafica le debemos poder apicar un filtro en data para ver solamente cierto tipo de crimenes
-# Graph 2
-#data$month
-
-#count_type <- count(data, `Primary Type`)
-
-#ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
-#  geom_treemap() +
-#  geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
-#                    reflow = TRUE, min.size = 3)
-
-
+vars_show_table = c("ID", "Date", "Primary Type", "Location Description", "Description", "Domestic", "Arrest")
 
 
 # Define UI for application that plots features of movies -----------
@@ -101,7 +84,7 @@ ui <- fluidPage(
                             "VACANT LOT/SPACE", "CHURCH", "VENUE", "INDUSTRIAL SPACE" , "OTHER"), 
                   options = list(`actions-box` = TRUE), 
                   multiple = T, 
-                  selected = "COMMERCIAL PROPERTY"),
+                  selected = c("MEDICAL FACILITY", "BANK")),
       
       # Show data table
       checkboxInput(inputId = "show_table",
@@ -116,17 +99,14 @@ ui <- fluidPage(
     
     # Output --------------------------------------------------------
     mainPanel(
+      # Create tabs to display the three graphs, one per tab
+      tabsetPanel(
+        tabPanel(title = "Bar Chart", plotOutput(outputId = "bar_chart")),
+        tabPanel(title = "Tree Map", plotOutput(outputId = "tree_map")),
+        tabPanel(title = "Heat Map", plotOutput(outputId = "heat_map"))
+      ),
       
-      # Show bar chart --------------------------------------------
-      plotOutput(outputId = "bar_chart"),
-      
-      # Show treemap
-      plotOutput(outputId = "tree_map"),
-      
-      # Show heatmap
-      plotOutput(outputId = "heat_map"),
-      
-      #Show table
+      #Show tableat bottom of the tabsPanel
       DT::dataTableOutput(outputId = "crimes_table")
     )
   )
@@ -148,7 +128,11 @@ server <- function(input, output, session) {
   # Create graph
   output$bar_chart <- renderPlot({
     ggplot(data = data_subset_domestic(), aes(x = reorder(Month, as.integer(month)))) +
-      geom_bar()
+      geom_bar(fill = "#66194d") + xlab("Month") + ylab("Count of crimes") +
+      theme(axis.text = element_text(size = 14), 
+            axis.title = element_text(size = 16, face = "bold"), 
+            panel.background = element_rect(fill = "white"), 
+            axis.ticks = element_blank())
     
   })
   
@@ -158,19 +142,21 @@ server <- function(input, output, session) {
     ggplot(count(data_subset_domestic(), `Primary Type`), aes(area = n, label = `Primary Type` , fill = n)) +
       geom_treemap() +
       geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
-                        reflow = TRUE, min.size = 3)
+                        reflow = TRUE, min.size = 3) +
+      scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
   })
   
   # Create third graph: heatmap
   output$heat_map <- renderPlot({
     ggplot(count(data_subset_domestic(), Hour, Wday), aes(Hour, Wday)) +
-      geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal()
+      geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal() +
+      scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
   })
   
   # Print data table if checked -------------------------------------
   output$crimes_table <- DT::renderDataTable(
     if(input$show_table){
-      DT::datatable(data = data_subset_domestic()[, 1:7], 
+      DT::datatable(data = data_subset_domestic()[, vars_show_table], 
                     options = list(pageLength = 10), 
                     rownames = FALSE)
     })

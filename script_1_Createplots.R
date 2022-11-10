@@ -47,7 +47,12 @@ data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 
 # Graph 1
 ggplot(data, aes(x = reorder(Month, as.integer(month)))) +
-  geom_bar()
+  geom_bar(fill = "#66194d") + xlab("Month") + ylab("Count of crimes") +
+  theme(axis.text = element_text(size = 14), 
+        axis.title = element_text(size = 16, face = "bold"), 
+        panel.background = element_rect(fill = "white"), 
+        axis.ticks = element_blank())
+
 
 # a esta grafica le debemos poder apicar un filtro en data para ver solamente cierto tipo de crimenes
 # Graph 2
@@ -58,7 +63,8 @@ count_type <- count(data, `Primary Type`)
 ggplot(count_type, aes(area = n, label = `Primary Type` , fill = n)) +
   geom_treemap() +
   geom_treemap_text(fontface = "bold", colour = "white", place = "centre", 
-                    reflow = TRUE, min.size = 3)
+                    reflow = TRUE, min.size = 3) +
+  scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
 
 
 
@@ -75,9 +81,12 @@ table(data$Hour)
 
 
 ggplot(count_date, aes(Hour, Wday)) +
-  geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal()
+  geom_tile(aes(fill = n), colour = "white", na.rm = TRUE) + theme_minimal() +
+  scale_fill_gradient(low = "#f5d6eb", high = "#66194d")
 
 
-# fourth graph: another heatmap
 (table(data$`Primary Type`))
+colnames(data)
+vars_show = c("ID", "Date", "Primary Type", "Location Description", "Description", "Domestic", "Arrest")
+data[, vars_show ]
 
