@@ -15,7 +15,6 @@ library(treemapify)
 library(shinyWidgets)
 library(DT)
 
-
 data <- read_csv("CrimesChicago_2022.csv")
 data$Date <- parse_date_time(data$Date, "%m/%d/%y %I:%M:%S %p")
 data$month <- format(as.Date(data$Date), "%m")
@@ -56,7 +55,6 @@ data$`Location Description` <- dplyr::case_when(data$`Location Description` %in%
 
 data$IsDomestic <- ifelse(data$Domestic == TRUE, "Domestic", "Non-domestic")
 vars_show_table = c("ID", "Date", "Primary Type", "Location Description", "Description", "Domestic", "Arrest")
-
 
 # Define UI for application that plots features of movies -----------
 ui <- fluidPage(
